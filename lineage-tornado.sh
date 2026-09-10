@@ -25,7 +25,7 @@ echo "==================="
 sudo apt-get update && sudo apt-get install patchelf coreutils -y;
 
 
-export BUILD_USERNAME=Abhinav
+export BUILD_USERNAME=Happy
 export BUILD_HOSTNAME=foss
 
 rm -rf build/soong/fsgen;
