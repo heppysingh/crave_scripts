@@ -14,7 +14,7 @@ echo "====================="
 
 repo init -u https://github.com/LineageOS/android.git -b lineage-24.0 --depth=1 --git-lfs;
 
-git clone https://github.com/Alromine95/local-manifest-tornado.git -b main .repo/local_manifests;
+git clone https://github.com/heppysingh/local-manifest-tornado.git -b main .repo/local_manifests;
 
 echo "==================="
 echo "     repo sync     "
