@@ -1,5 +1,5 @@
-
 #!/bin/bash
+set -e
 
 echo "========================"
 echo "removing local manifests"
@@ -20,10 +20,12 @@ echo "==================="
 echo "     repo sync     "
 echo "==================="
 
+# Purge dirty/deprecated prebuilts from Crave cache to prevent SyncError
+rm -rf prebuilts/gcc prebuilts/clang
+
 /opt/crave/resync.sh;
 
 sudo apt-get update && sudo apt-get install patchelf coreutils -y;
-
 
 export BUILD_USERNAME=Happy
 export BUILD_HOSTNAME=foss
@@ -34,7 +36,7 @@ echo "build started!..."
 
 . build/envsetup.sh;
 lunch lineage_tornado-bp4a-userdebug;
-m bacon 
+m bacon
 
 echo "Upload to GoFile will be started..."
 
@@ -46,6 +48,7 @@ if [ -n "$ZIP" ]; then
     chmod +x upload.sh
     ./upload.sh "$ZIP"
 else
-    echo "No ROM ZIP found!"
+    echo "No ROM ZIP found!
+    "
     exit 1
 fi
