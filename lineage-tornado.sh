@@ -35,7 +35,7 @@ rm -rf build/soong/fsgen;
 echo "build started!..."
 
 . build/envsetup.sh;
-lunch lineage_tornado-bp4a-userdebug;
+lunch lineage_air-bp4a-userdebug;
 m bacon
 
 echo "Upload to GoFile will be started..."
