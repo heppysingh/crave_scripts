@@ -1,60 +1,104 @@
 #!/bin/bash
 
-echo "========================"
-echo "removing local manifests"
-echo "========================"
+set -eE
+trap 'echo " FAILED at line $LINENO"; exit 1' ERR
 
-rm -rf .repo/local_manifests;
-rm -rf .repo;
-rm -rf out/soong/.intermediates/system/sepolicy;
+rm -rf .repo/local_manifests
 
-echo "====================="
-echo "      Repo init      "
-echo "====================="
 
-repo init -u https://github.com/yaap/manifest.git -b sixteen --depth=1 --git-lfs;
+# repo init rom
+repo init -u https://github.com/yaap/manifest.git -b sixteen --depth=1 --git-lfs 
+echo "=================="
+echo "Repo init success"
+echo "=================="
 
-git clone https://github.com/Alromine95/Local-manifest.git -b main .repo/local_manifests;
+# Local manifests
+git clone https://github.com/heppysingh/Local-manifest.git -b main .repo/local_manifests
+echo "============================"
+echo "Local manifest clone success"
+echo "============================"
 
-echo "==================="
-echo "     repo sync     "
-echo "==================="
+# Build Sync
+
 
 /opt/crave/resync.sh;
 
-sudo apt-get update && sudo apt-get install patchelf coreutils -y;
+/opt/crave/resync.sh;
 
-export BUILD_USERNAME=Abhinav
+echo "============="
+echo "Sync success"
+echo "============="
+
+# Installing packages 
+sudo apt-get update && sudo apt-get install patchelf coreutils -y 
+echo "============="
+echo "packages done"
+echo "============="
+
+# Export
+export BUILD_USERNAME=heppy
 export BUILD_HOSTNAME=foss
+export BUILD_BROKEN_MISSING_REQUIRED_MODULES=true
+export IGNORE_PATCH_ERRORS=true
+echo "======= Export Done ======"
 
-rm -rf build/soong/fsgen;
+#Fixing patchs
+git -C frameworks/av am --abort 2>/dev/null || true
+git -C frameworks/base am --abort 2>/dev/null || true
+git -C hardware/interfaces am --abort 2>/dev/null || true
+git -C packages/modules/Bluetooth am --abort 2>/dev/null || true
+git -C build/soong am --abort 2>/dev/null || true
+git -C system/sepolicy am --abort 2>/dev/null || true
 
-# Clone Soong
-rm -rf build/soong
-git clone https://github.com/yaap/build_soong.git -b sixteen build/soong
-
-# 2. Patch Go 1.23+ incompatibilities in execution_metrics.go
-sed -i 's/"golang.org\/x\/exp\/maps"/& \n\t"sort"/' build/soong/ui/execution_metrics/execution_metrics.go
-sed -i 's/slices\.Sorted(maps\.Keys(\([^)]*\)))/func() []string { keys := make([]string, 0, len(\1)); for k := range \1 { keys = append(keys, k) }; sort.Strings(keys); return keys }()/' build/soong/ui/execution_metrics/execution_metrics.go
+#deleting extra generator
+rm -rf vendor/lineage/build/soong/generator
+rm -rf out/.module_paths
 
 
-echo "build started!..."
+#Go fix
+SOONG_FILE="build/soong/ui/execution_metrics/execution_metrics.go"
 
-source build/envsetup.sh ;
-lunch yaap_blossom-bp2a-userdebug ;
-m installclean ;
-m yaap ;
+if [ -f "$SOONG_FILE" ]; then
+    echo "Re-patching execution_metrics.go safely..."
 
-echo "Upload to GoFile will be started..."
+    git checkout -- "$SOONG_FILE" 2>/dev/null || true
 
-ZIP=$(find out/target/product/blossom -maxdepth 1 -type f -name "*.zip" | head -n 1)
+    grep -q '"sort"' "$SOONG_FILE" || \
+        sed -i '/^import (/a\    "sort"' "$SOONG_FILE"
 
-if [ -n "$ZIP" ]; then
-    echo "Uploading $ZIP..."
-    wget https://raw.githubusercontent.com/lordgaruda/GoFile-Upload/refs/heads/master/upload.sh
-    chmod +x upload.sh
-    ./upload.sh "$ZIP"
+    sed -i '/"maps"/d; /"slices"/d' "$SOONG_FILE"
+
+    sed -i 's/slices\.Sorted(maps\.Keys(\([^)]*\)))/func() []string { keys := make([]string, 0, len(\1)); for k := range \1 { keys = append(keys, k) }; sort.Strings(keys); return keys }()/' "$SOONG_FILE"
+
+    echo "patched successfully"
 else
-    echo "No ROM ZIP found!"
-    exit 1
+    echo "$SOONG_FILE not found, skipping Go patch."
 fi
+
+echo "=======soong fix done========"
+
+#Making kernel modules dir
+mkdir -p device/xiaomi/blossom-kernel/modules
+
+#Fixing audio files
+AUDIO_BP="hardware/interfaces/audio/common/all-versions/default/Android.bp"
+if [ -f "$AUDIO_BP" ]; then
+    echo "Fixing Audio select type condition..."
+    sed -i 's/"true":/true:/g' "$AUDIO_BP"
+    echo "Audio Android.bp patched!"
+else
+    echo "Audio Android.bp not found."
+fi
+
+echo "=======audio fix done========="
+
+
+# Set up build environment
+source build/envsetup.sh
+echo "============="
+
+# Lunch
+lunch yaap_blossom-bp2a-userdebug
+
+# Build
+m yaap
