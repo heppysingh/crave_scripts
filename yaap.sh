@@ -15,7 +15,7 @@ echo "=================="
 # Local manifests
 git clone https://github.com/heppysingh/Local-manifest.git -b main .repo/local_manifests
 echo "============================"
-echo "Local manifest clone success"
+echo "Local manifest clone done   "
 echo "============================"
 
 # Build Sync
@@ -26,7 +26,7 @@ echo "============================"
 /opt/crave/resync.sh;
 
 echo "============="
-echo "Sync success"
+echo "Sync done    "
 echo "============="
 
 # Installing packages 
