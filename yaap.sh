@@ -18,6 +18,11 @@ echo "============================"
 echo "Local manifest clone done   "
 echo "============================"
 
+#delete old clang
+
+rm -rf prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9 \
+       prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
+
 # Build Sync
 
 
