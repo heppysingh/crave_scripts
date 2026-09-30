@@ -18,11 +18,6 @@ echo "============================"
 echo "Local manifest clone done   "
 echo "============================"
 
-#delete old clang
-
-rm -rf prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9 \
-       prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9
-
 # Build Sync
 
 
@@ -33,6 +28,16 @@ rm -rf prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9 \
 echo "============="
 echo "Sync done    "
 echo "============="
+
+# fixing clang
+
+for toolchain in \
+    "prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9" \
+    "prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9"; do
+    if [ -d "$toolchain" ]; then
+        rm -rf "$toolchain"
+    fi
+done
 
 # Installing packages 
 sudo apt-get update && sudo apt-get install patchelf coreutils -y 
