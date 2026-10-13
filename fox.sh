@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script to build OrangeFox Recovery on Crave.io
+# Script to build OrangeFox Recovery 
 # Converted from .github/workflows/build.yml
 # ==============================================================================
 
@@ -8,16 +8,16 @@ set -eo pipefail
 
 # ----------------- Configuration & Defaults -----------------
 # Can be overridden via arguments or environment variables:
-# ./crave.sh [MANIFEST_BRANCH] [BUILD_TARGET]
+#  
 MANIFEST_BRANCH="${1:-${MANIFEST_BRANCH:-16.0}}"
 BUILD_TARGET="${2:-${BUILD_TARGET:-fox_tornado-bp2a-eng}}"
-WORK_DIR="${WORK_DIR:-/crave/android}"
+WORK_DIR="${WORK_DIR:-/fox/android}"
 DEVICE_TREE_REPO="https://github.com/heppysingh/ofox_tornado.git"
 DEVICE_TREE_BRANCH="main"
 DEVICE_DIR="$WORK_DIR/device/xiaomi/tornado"
 
 echo "=================================================="
-echo " Starting OrangeFox Build for Crave.io"
+echo " Starting OrangeFox Build for "
 echo " Manifest Branch : $MANIFEST_BRANCH"
 echo " Build Target    : $BUILD_TARGET"
 echo " Working Dir     : $WORK_DIR"
@@ -113,6 +113,6 @@ fi
 echo "=================================================="
 echo " Build script finished!"
 echo " Pull your artifacts using:"
-echo "   crave pull out/target/product/tornado/vendor_boot.img"
-echo "   crave pull out/target/product/tornado/OrangeFox*"
+echo "   out/target/product/tornado/vendor_boot.img"
+echo "   out/target/product/tornado/OrangeFox*"
 echo "=================================================="
