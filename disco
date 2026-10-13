@@ -1,0 +1,31 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Turn off torch cleanly on exit
+cleanup() {
+    su -c 'echo 0 > /sys/devices/platform/flashlights_ocp8132/torch_brightness 2>/dev/null'
+    kill $(jobs -p) 2>/dev/null
+    exit 0
+}
+trap cleanup SIGINT SIGTERM EXIT
+
+# Background torch
+su -c '
+NODE="/sys/devices/platform/flashlights_ocp8132/torch_brightness"
+while true; do
+    echo 100 > "$NODE" 2>/dev/null
+    sleep 0.1
+    echo 0 > "$NODE" 2>/dev/null
+    sleep 0.1
+done
+' &
+
+# Background vibrator
+su -c '
+VIB="/sys/devices/platform/soc/soc:regulator-vibrator/leds/vibrator/activate"
+while true; do
+    echo 1 > "$VIB" 2>/dev/null
+    sleep 0.05
+done
+' &
+
+wait
